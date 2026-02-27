@@ -25,7 +25,7 @@ This repo organizes project context into distinct layers, each mapped to a nativ
 │  Domain Knowledge (memory/)                                   │
 │  Pure content: entities, business rules, integration contracts│
 │  Loaded on demand by skills that need domain context.         │
-│  Easy to read and edit — no skill machinery.                  │
+│  Easy to read and edit.                                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  On-Demand Skills (skills/*/SKILL.md)                         │
 │  Loaded when the AI determines the task is relevant.          │
