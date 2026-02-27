@@ -13,7 +13,7 @@ Structured procedure for reviewing code against the project's standards and best
 
 - Read the PR description or the user's explanation of what changed and why.
 - Identify which bounded contexts and layers are affected.
-- Load the `memory` skill if domain understanding is needed.
+- Read `.github/memory/MEMORY.md` to find the relevant domain knowledge files if domain understanding is needed.
 
 ### Step 2: Check Against Coding Standards
 

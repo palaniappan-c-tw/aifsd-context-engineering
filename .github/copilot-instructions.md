@@ -5,7 +5,9 @@
 
 > Language & Path specific standards or rules → `.github/instructions/*.instructions.md`
 
-> On Demand domain knowledge & task workflows → `.github/skills/*/SKILL.md`
+> Domain knowledge (entities, rules, integrations) → `.github/memory/MEMORY.md`
+
+> On Demand task workflows → `.github/skills/*/SKILL.md`
 
 ---
 

@@ -13,7 +13,7 @@ Step-by-step procedure for turning a Jira user story into a compliant, tested im
 
 Use the [Story Analysis Template](story-analysis-template.md) to break down the story:
 - Extract acceptance criteria into testable requirements.
-- Identify which bounded contexts and entities are involved (load the `memory` skill if needed).
+- Read `.github/memory/MEMORY.md` to find the relevant domain knowledge files, then read the files needed for this story (entities, business rules, integration contracts).
 - Determine affected layers (API / Service / Repository / Events / UI).
 
 ### Step 2: Plan the Changes

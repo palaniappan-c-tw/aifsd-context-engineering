@@ -6,52 +6,59 @@ A reference repository that defines a structured approach to **context engineeri
 
 Developers experience too much back-and-forth with AI code generation tools because the AI lacks knowledge of internal tech stacks, coding standards, and architectural patterns. This leads to hallucinated patterns, standards violations, and excessive manual correction.
 
-## The Solution: Three-Tier Context Architecture
+## The Solution: Layered Context Architecture
 
-This repo organizes project context into three tiers, each mapped to a native GitHub Copilot feature:
+This repo organizes project context into distinct layers, each mapped to a native GitHub Copilot feature:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Tier 1: Always-On (copilot-instructions.md)                    │
-│  Loaded into EVERY Copilot interaction.                         │
+│  Always-On (copilot-instructions.md)                          │
+│  Loaded into EVERY Copilot interaction.                       │
 │  Project identity, architecture, build commands, non-negotiables│
-│  Thin by design.                                                │
+│  Thin by design.                                              │
 ├─────────────────────────────────────────────────────────────────┤
-│  Tier 2: Auto by File Type (*.instructions.md)                  │
-│  Loaded when matching files are open/edited.                    │
-│  Language & framework coding standards, naming conventions.     │
-│  As detailed as needed per language.                            │
+│  Auto by File Type (*.instructions.md)                        │
+│  Loaded when matching files are open/edited.                  │
+│  Language & framework coding standards, naming conventions.   │
+│  As detailed as needed per language.                          │
 ├─────────────────────────────────────────────────────────────────┤
-│  Tier 3: On-Demand Skills (skills/*/SKILL.md)                   │
-│  Loaded when the AI determines the task is relevant.            │
-│  Domain knowledge, step-by-step workflows, scripts, templates.  │
-│  Progressive: metadata → instructions → resources.              │
+│  Domain Knowledge (memory/)                                   │
+│  Pure content: entities, business rules, integration contracts│
+│  Loaded on demand by skills that need domain context.         │
+│  Easy to read and edit — no skill machinery.                  │
+├─────────────────────────────────────────────────────────────────┤
+│  On-Demand Skills (skills/*/SKILL.md)                         │
+│  Loaded when the AI determines the task is relevant.          │
+│  Step-by-step workflows that orchestrate domain knowledge.    │
+│  Progressive: metadata → instructions → resources.            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Design principle**: Not too little, not too much. Each tier loads only when needed, keeping the AI's context window efficient.
+**Design principle**: Memory owns the **content** (pure domain knowledge), skills own the **orchestration** (when and which memory files to pull in). Each layer loads only when needed, keeping the AI's context window efficient.
 
 ## Structure
 
 ```
 .github/
-├── copilot-instructions.md              # Tier 1: Always-on project memory
+├── copilot-instructions.md              #   Always-on project memory
 │
-├── instructions/                        # Tier 2: Path-scoped coding standards
+├── instructions/                        #   Path-scoped coding standards
 │   ├── java.instructions.md             #   applyTo: **/*.java — Spring Boot conventions
 │   ├── test.instructions.md             #   applyTo: **/*Test.java, *IT.java — testing standards
 │   └── database.instructions.md         #   applyTo: **/db/migration/**, *.sql — Flyway & schema rules
 │
-└── skills/                              # Tier 3: On-demand capabilities
-    ├── memory/                          #   Domain knowledge (entities, rules, integrations)
-    │   ├── SKILL.md                     #   Index + memory maintenance protocol
-    │   ├── domain-model.md              #   Entities, aggregates, lifecycle states
-    │   ├── business-rules.md            #   Invariants, validations, policies, terminology
-    │   ├── integrations.md              #   Events, external APIs, anti-corruption rules
-    │   └── samples/                     #   Filled e-commerce examples for reference
-    │       ├── domain-model-sample.md
-    │       ├── business-rules-sample.md
-    │       └── integrations-sample.md
+├── memory/                              #   Domain knowledge
+│   ├── MEMORY.md                        #   Index + memory maintenance protocol
+│   ├── README.md                        #   Explains the concept and approach for developers
+│   ├── domain-model.md                  #   Entities, aggregates, lifecycle states
+│   ├── business-rules.md                #   Invariants, validations, policies, terminology
+│   ├── integrations.md                  #   Events, external APIs, anti-corruption rules
+│   └── samples/                         #   Filled e-commerce examples for reference
+│       ├── domain-model-sample.md
+│       ├── business-rules-sample.md
+│       └── integrations-sample.md
+│
+└── skills/                              #   On-demand workflows
     ├── story-to-code/                   #   Workflow: Jira story → implementation
     │   ├── SKILL.md
     │   └── story-analysis-template.md
@@ -66,7 +73,8 @@ This repo organizes project context into three tiers, each mapped to a native Gi
 |----------|--------|------|
 | Should the AI **always** know this? | Project shape, build commands, global conventions | `copilot-instructions.md` |
 | Should the AI know this **when touching specific file types**? | Language coding standards, framework patterns | `instructions/*.instructions.md` |
-| Should the AI know this **when doing a specific task**? | Domain context, step-by-step workflows, templates | `skills/*/SKILL.md` |
+| Should the AI know this **when doing a specific task**? | Step-by-step workflows, templates | `skills/*/SKILL.md` |
+| Should the AI know this **when generating domain-aware code**? | Domain entities, rules, integration contracts | `memory/MEMORY.md` |
 
 ## How to Adopt
 
@@ -97,14 +105,22 @@ Add, remove, or replace files to match your stack. Examples:
 - `python.instructions.md` with `applyTo: "**/*.py"` for Python projects
 - `api.instructions.md` with `applyTo: "**/controller/**"` for API-specific conventions
 
-### 4. Customize the skills
+### 4. Populate the memory files
 
-- **`memory/`** — Fill in your project's domain model, business rules, and integration contracts. See the `samples/` subfolder for a complete e-commerce example to reference. The memory skill includes an AI maintenance protocol — the AI will propose updates to these files as it discovers undocumented domain facts.
+Fill in the domain knowledge files under `memory/`:
+- **`domain-model.md`** — Your project's entities, fields, aggregate boundaries, and lifecycle state machines.
+- **`business-rules.md`** — Invariants, validations, policies, and domain terminology.
+- **`integrations.md`** — Events published/consumed, external service contracts, and anti-corruption rules.
+
+See the `samples/` subfolder for a complete e-commerce example. The AI maintenance protocol in `MEMORY.md` means the AI will also propose updates to these files as it discovers undocumented domain facts.
+
+### 5. Customize the skills
+
 - **`story-to-code/`** — Adjust the workflow steps to match your team's development process.
 - **`code-review/`** — Update the checklist to reflect your team's priorities.
 - Add new skills for workflows specific to your project.
 
-### 5. Commit and iterate
+### 6. Commit and iterate
 
 Commit the `.github/` folder to your repo. Context engineering is iterative — start with the basics and refine as you observe Copilot's behaviour.
 
@@ -112,19 +128,19 @@ Commit the `.github/` folder to your repo. Context engineering is iterative — 
 
 - **Add rules reactively**: When Copilot generates code that violates a standard, add that rule to the relevant instruction file.
 - **Keep `copilot-instructions.md` thin**: If it grows past ~2 pages, move content to instruction files or skills.
-- **Update domain knowledge**: When entities, services, or boundaries change, update the `memory` skill.
+- **Update domain knowledge**: When entities, services, or boundaries change, update the files in `.github/memory/`. See [memory/README.md](.github/memory/README.md) for guidance.
 - **Review quarterly**: Check if rules are still relevant — models improve over time and may no longer need certain guardrails.
 
 ## Compatibility
 
 These context files work across all GitHub Copilot modes:
 
-| Mode | `copilot-instructions.md` | `*.instructions.md` | Skills (`SKILL.md`) |
-|------|:---:|:---:|:---:|
-| Copilot Chat (Ask/Edit) | ✅ | ✅ | ✅ |
-| Agent Mode (VS Code) | ✅ | ✅ | ✅ |
-| Coding Agent (Cloud) | ✅ | ✅ | ✅ |
-| GitHub CLI | ✅ | ✅ | ✅ |
+| Mode | `copilot-instructions.md` | `*.instructions.md` | Memory (`MEMORY.md`) | Skills (`SKILL.md`) |
+|------|:---:|:---:|:---:|:---:|
+| Copilot Chat (Ask/Edit) | ✅ | ✅ | ✅ | ✅ |
+| Agent Mode (VS Code) | ✅ | ✅ | ✅ | ✅ |
+| Coding Agent (Cloud) | ✅ | ✅ | ✅ | ✅ |
+| GitHub CLI | ✅ | ✅ | ✅ | ✅ |
 
 ## References
 
@@ -132,3 +148,4 @@ These context files work across all GitHub Copilot modes:
 - [GitHub Copilot Custom Instructions](https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot)
 - [GitHub Copilot Agent Skills](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-skills)
 - [VS Code Copilot Customization](https://code.visualstudio.com/docs/copilot/copilot-customization)
+- [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
