@@ -25,9 +25,15 @@ Before writing any code, produce a brief plan covering:
 - **Event changes** — new Kafka topics, event schemas.
 - **Dependencies** — any new libraries or configurations needed.
 
---Review Plan Developer--
+### Step 3: Review the Plan with the Developer
 
-### Step 3: Generate the Implementation 
+Present the plan to the developer and **wait for explicit approval** before proceeding:
+- Summarize the plan in a clear, structured format.
+- Ask the developer to **accept**, **request changes**, or **reject** the plan.
+- If the developer proposes changes, incorporate their feedback, update the plan, and present it again for approval.
+- **Do not generate any code or tests until the developer has accepted the plan.**
+
+### Step 4: Generate the Implementation 
 
 Generate code layer by layer, following the project's coding standards (loaded from `.github/instructions/`):
 1. **Database migration** (if needed) — Flyway script following naming conventions.
@@ -38,7 +44,7 @@ Generate code layer by layer, following the project's coding standards (loaded f
 6. **Event producer/consumer** (if needed) — Kafka integration following outbox pattern.
 7. **Frontend components** (if needed) — React components following team conventions.
 
-### Step 4: Generate Tests
+### Step 5: Generate Tests
 
 For each layer of code generated:
 - Unit tests for service methods (happy path + edge cases).
@@ -46,12 +52,12 @@ For each layer of code generated:
 - Component tests for React UI (React Testing Library).
 - Verify test coverage meets the team's standards.
 
-### Step 5: Self-Review
+### Step 6: Self-Review
 
 Before presenting the implementation, review it against:
 - The coding standards in `.github/instructions/`.
 - The acceptance criteria from Step 1.
-- The `code-review` skill's checklist (load it if available).
+- The `code-review` skill's checklist
 
 ## Resources
 
