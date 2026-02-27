@@ -25,7 +25,9 @@ Before writing any code, produce a brief plan covering:
 - **Event changes** — new Kafka topics, event schemas.
 - **Dependencies** — any new libraries or configurations needed.
 
-### Step 3: Generate the Implementation
+--Review Plan Developer--
+
+### Step 3: Generate the Implementation 
 
 Generate code layer by layer, following the project's coding standards (loaded from `.github/instructions/`):
 1. **Database migration** (if needed) — Flyway script following naming conventions.

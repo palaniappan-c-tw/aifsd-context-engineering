@@ -43,10 +43,15 @@ This repo organizes project context into three tiers, each mapped to a native Gi
 │   └── database.instructions.md         #   applyTo: **/db/migration/**, *.sql — Flyway & schema rules
 │
 └── skills/                              # Tier 3: On-demand capabilities
-    ├── memory/                          #   Domain knowledge (entities, bounded contexts)
-    │   ├── SKILL.md
-    │   ├── entity-glossary.md
-    │   └── bounded-contexts.md
+    ├── memory/                          #   Domain knowledge (entities, rules, integrations)
+    │   ├── SKILL.md                     #   Index + memory maintenance protocol
+    │   ├── domain-model.md              #   Entities, aggregates, lifecycle states
+    │   ├── business-rules.md            #   Invariants, validations, policies, terminology
+    │   ├── integrations.md              #   Events, external APIs, anti-corruption rules
+    │   └── samples/                     #   Filled e-commerce examples for reference
+    │       ├── domain-model-sample.md
+    │       ├── business-rules-sample.md
+    │       └── integrations-sample.md
     ├── story-to-code/                   #   Workflow: Jira story → implementation
     │   ├── SKILL.md
     │   └── story-analysis-template.md
@@ -94,7 +99,7 @@ Add, remove, or replace files to match your stack. Examples:
 
 ### 4. Customize the skills
 
-- **`memory/`** — Fill in your project's domain entities, bounded contexts, and business rules.
+- **`memory/`** — Fill in your project's domain model, business rules, and integration contracts. See the `samples/` subfolder for a complete e-commerce example to reference. The memory skill includes an AI maintenance protocol — the AI will propose updates to these files as it discovers undocumented domain facts.
 - **`story-to-code/`** — Adjust the workflow steps to match your team's development process.
 - **`code-review/`** — Update the checklist to reflect your team's priorities.
 - Add new skills for workflows specific to your project.
