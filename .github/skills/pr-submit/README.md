@@ -15,6 +15,17 @@ Raise a well-formed GitHub Pull Request without leaving editor/IDE — no GitHub
 
 ---
 
+## Prerequisites
+
+| Requirement | Details |
+|---|---|
+| **GitHub MCP server** | Must be configured and authenticated in VS Code. The skill uses the `create_pull_request` and `request_reviewers` MCP tools to interact with GitHub. |
+| **Git** | `git` must be installed and the repository must have a remote named `origin` pointing to GitHub. |
+| **Authenticated remote** | Your local Git must have push access to `origin` (SSH key or HTTPS credential configured). |
+| **At least one commit ahead of base** | The branch must have commits not yet on the base branch — otherwise there is nothing to PR. |
+
+---
+
 ## How to Use
 
 Trigger the skill in Copilot Chat:
