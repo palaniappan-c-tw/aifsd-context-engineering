@@ -7,7 +7,6 @@ description: >
   Analyses atomicity, generates Conventional Commits messages, enforces
   @JohnDeere.com author identity, and supports pair-programming co-authorship.
   Do NOT trigger for queries about viewing diffs, git status, or git history.
-allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git config:*), Bash(git commit:*)
 ---
 
 # Overview
