@@ -1,13 +1,15 @@
 ---
 name: pr-review
 description: >
-  Comprehensive PR review workflow. Use this skill whenever someone says
-  "review my PR", "review this pull request", "check this PR", "is this ready
-  to merge", or "review changes on this branch for merging". Runs after a PR
-  has been raised — not for pre-commit or pre-PR checks (use code-reviewer for
-  those). Orchestrates code quality, test coverage, error handling, and type
-  design analysis in parallel using specialised subagents, then runs the
-  project build.
+  Comprehensive PR review workflow that orchestrates parallel subagent analysis
+  across code quality, test coverage, error handling, and type design — then runs
+  a project build to validate readiness. Use this skill whenever someone mentions
+  reviewing a pull request or branch, including phrases like "review my PR",
+  "check this PR", "review this pull request", "is this ready to merge",
+  "review changes on this branch", or any request to assess code changes before
+  merging. Also trigger for softer cues like "can you look at my changes",
+  "is my branch good to go", or "check my diff" — even if the word "PR" isn't
+  used explicitly.
 argument-hint: "[branch:<name>] [code|tests|errors|types|all] [maven]"
 ---
 
