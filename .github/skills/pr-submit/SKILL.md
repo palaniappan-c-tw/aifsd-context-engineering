@@ -23,7 +23,20 @@ Use `BASE_BRANCH` in all subsequent steps.
 
 ---
 
-### Step 2: Validate the Current Branch
+### Step 2: Derive the Ticket ID
+
+Follow this priority order to obtain the ticket ID:
+
+#### 2.1: Check if User Provided a Ticket ID
+
+If the user provided a ticket ID when invoking this skill (e.g., "submit PR with ticket ABC-123"), use it directly:
+```bash
+TICKET_ID="<USER_PROVIDED_ID>"
+```
+
+#### 2.2: Extract from Branch Name
+
+If no ticket ID was provided by the user, attempt to extract it from the branch name:
 
 1. Store the active branch name:
    ```bash
@@ -33,15 +46,54 @@ Use `BASE_BRANCH` in all subsequent steps.
    ```bash
    echo "$BRANCH" | grep -qE '^(feat|fix|chore|docs|refactor|test)/.+'
    ```
-   - If the command exits non-zero, the branch does **not** match. Warn the user and ask whether to proceed anyway or rename the branch first.
+   - If the match succeeds, extract the **ticket ID** from the segment after `<type>/`:
+     ```bash
+     TICKET_ID=$(echo "$BRANCH" | sed -E 's/^[^/]+\///' | cut -d'/' -f1)
+     ```
+   - If the match fails, proceed to Step 2.3.
    - Allowed types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
    - Examples: `feat/PROJ-123`, `fix/AUTH-42`
-3. Extract the **ticket ID** from the branch name (the segment after `<type>/`).
-   - Store as `TICKET_ID` for use in the PR description.
+
+#### 2.3: Extract from Commit Messages
+
+If the branch name does not contain a ticket ID, examine the commit messages:
+
+```bash
+git log $BASE_BRANCH..HEAD --pretty=format:'%B' | grep -oE '\b[A-Z][A-Z0-9]+-[0-9]+\b' | head -1
+```
+
+- If a ticket ID pattern (e.g., `PROJ-123`, `AUTH-42`) is found, store it as `TICKET_ID`.
+- If no ticket ID is found, proceed to Step 2.4.
+
+#### 2.4: Ask User How to Proceed
+
+If no ticket ID has been derived, inform the user:
+
+> "Could not automatically derive a ticket ID from the branch name or commit messages. How would you like to proceed?
+>
+> Option 1: Provide a ticket ID now (e.g., `ABC-123`)
+> Option 2: Continue without a ticket ID (PR title will not include a ticket prefix)
+> Option 3: Abort and rename the branch / update commits first"
+
+- If the user provides a ticket ID, store it as `TICKET_ID`.
+- If the user chooses to continue without one, set `TICKET_ID=""` (empty).
+- If the user chooses to abort, stop the workflow.
 
 ---
 
-### Step 3: Check Commits
+### Step 3: Validate the Current Branch
+
+1. Validate the branch name matches the convention:
+   ```bash
+   echo "$BRANCH" | grep -qE '^(feat|fix|chore|docs|refactor|test)/.+'
+   ```
+   - If the command exits non-zero, the branch does **not** match. Warn the user and ask whether to proceed anyway or rename the branch first.
+   - Allowed types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
+   - Examples: `feat/PROJ-123`, `fix/AUTH-42`
+
+---
+
+### Step 4: Check Commits
 
 1. Run `git log $BASE_BRANCH..HEAD --oneline` to list commits on this branch.
 2. Check whether commits are clean and meaningful (no "WIP", "fixup", "temp" messages).
@@ -60,24 +112,32 @@ Use `BASE_BRANCH` in all subsequent steps.
 
 ---
 
-### Step 4: Generate the PR Title
+### Step 5: Generate the PR Title
 
 Derive the PR title using the following format:
 
+**If `TICKET_ID` is not empty:**
 ```
 [<TICKET_ID>] <Imperative summary of the change>
 ```
 
+**If `TICKET_ID` is empty:**
+```
+<Imperative summary of the change>
+```
+
 Rules:
 - Use imperative mood: "Add", "Fix", "Refactor", "Remove" — not "Added" or "Adds".
-- Maximum 72 characters.
+- Maximum 72 characters (including ticket ID if present).
 - Infer the summary from the commit messages (`git log $BASE_BRANCH..HEAD --oneline`) or ask the user.
 
-Example: `[AUTH-42] Add JWT refresh token endpoint`
+Examples:
+- With ticket ID: `[AUTH-42] Add JWT refresh token endpoint`
+- Without ticket ID: `Add JWT refresh token endpoint`
 
 ---
 
-### Step 5: Generate the PR Description
+### Step 6: Generate the PR Description
 
 Use the template below. Derive the content from commit messages (`git log $BASE_BRANCH..HEAD --oneline`).
 
@@ -91,7 +151,7 @@ Use the template below. Derive the content from commit messages (`git log $BASE_
 
 ---
 
-### Step 6: Assign Reviewers
+### Step 7: Assign Reviewers
 
 If the user provided reviewer name(s) when triggering the skill, store them as `REVIEWERS` (comma-separated GitHub usernames).
 
@@ -99,7 +159,7 @@ If no reviewers were provided at invocation, **skip this step entirely** — do 
 
 ---
 
-### Step 7: Push the Branch
+### Step 8: Push the Branch
 
 Before creating the PR, ensure the branch exists on the remote:
 
@@ -111,7 +171,7 @@ If the push fails (e.g. rejected due to force-push protection), surface the erro
 
 ---
 
-### Step 8: Submit the PR
+### Step 9: Submit the PR
 
 Resolve `OWNER` and `REPO` from the remote URL:
 
