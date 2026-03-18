@@ -1,6 +1,6 @@
 # /commit Skill
 
-Commit staged and unstaged changes with atomic analysis, generated commit messages, and co-author support — without leaving your editor.
+Commit staged and unstaged changes with atomic analysis and generated commit messages — without leaving your editor.
 
 ---
 
@@ -8,11 +8,10 @@ Commit staged and unstaged changes with atomic analysis, generated commit messag
 
 | Pain Point | What This Skill Does |
 |---|---|
-| Writing commit messages mid-flow | Auto-generates a **Conventional Commits** message (`type(scope): description`) from the actual diff  |
+| Writing commit messages mid-flow | Auto-generates a message in the team's standard format (`#STORY [Author(s)] description`) from the actual diff |
 | Lumped, hard-to-review commits | Analyses changes for atomicity and proposes a clean breakdown into logical commits for your approval before executing |
-| Forgetting pair partner | Accepts a `CoAuthor` parameter and appends the `Co-authored-by` git trailer to every commit automatically |
-| Misconfigured git identity going unnoticed | Validates that both the author and co-author emails end with `@JohnDeere.com` before a single commit is made |
-| Manually staging files before committing | Auto-stages all changes (staged + unstaged) so the AI sees the full picture and you skip the `git add` step |
+| Misconfigured git identity going unnoticed | Validates that the author email ends with `@JohnDeere.com` before a single commit is made |
+| Forgetting to link a story | Prompts you to supply a story number or confirm `#nocard` if neither was provided at invocation |
 
 ---
 
@@ -42,15 +41,21 @@ commit my changes
 stage and commit everything
 ```
 
-Optionally, credit your pair partner at invocation:
+Provide a story reference and credit your collaborators at invocation:
 
 ```
-/commit CoAuthor = Sayeed
+/commit story=DIAG-000 authors=Prajwal
 ```
 
 ```
-/commit CoAuthor = Sayeed sayeed@JohnDeere.com
+/commit story=EPPT-3927 authors=Johny, Prashant
 ```
+
+```
+/commit nocard authors=Palani
+```
+
+All parameters are optional — if `story=` or `nocard` is omitted the skill will ask before proceeding.
 
 ---
 
@@ -58,11 +63,25 @@ Optionally, credit your pair partner at invocation:
 
 1. **Stages all changes** via `git add -A` so nothing is missed.
 2. **Validates the author email** from `git config` against the `@JohnDeere.com` domain — halts if invalid.
-3. **Validates the co-author email** if one was provided — halts and names the offending address if invalid.
+3. **Resolves the story reference** — uses the supplied `story=` key or `nocard`; if neither was provided, pauses and asks you to choose before continuing.
 4. **Analyses atomicity** — determines whether the diff represents one logical unit of work or several.
-5. **Single change** — generates one Conventional Commits message and executes immediately, no approval needed.
+5. **Single change** — generates one commit message and executes immediately, no approval needed.
 6. **Multiple changes** — proposes a numbered list of atomic commits for your approval; executes all in sequence on yes, or falls back to a single commit on no.
-7. **Appends co-author trailer** to every commit if a co-author was provided.
+
+---
+
+## Commit Message Format
+
+```
+#<STORY-NUM|nocard> [<Author(s)>] <short description>
+```
+
+| Segment | Details |
+|---|---|
+| `#STORY-NUM` | Jira / issue key, e.g. `#DIAG-000`, `#EPPT-3927` |
+| `#nocard` | Used when the commit is not linked to a story |
+| `[Author(s)]` | Comma-separated names in square brackets — included only when `authors=` is provided |
+| `description` | Imperative mood, sentence case, no trailing period, max 72 chars |
 
 ---
 
@@ -71,8 +90,8 @@ Optionally, credit your pair partner at invocation:
 | Check | Behaviour on Failure |
 |---|---|
 | Author email (`@JohnDeere.com`) | Halt. Warn developer. Do not commit. |
-| Co-author email (`@JohnDeere.com`) | Halt. Name the invalid email. Do not commit. |
 | No changes present | Exit with "Nothing to commit" message. |
+| Story reference missing | Pause and ask: supply a story number or confirm `#nocard`. |
 | Developer rejects atomic split | Fall back to a single commit covering all changes. |
 
 ---
@@ -81,18 +100,15 @@ Optionally, credit your pair partner at invocation:
 
 ```
 Proposed atomic commits:
-  [1] feat(auth): add JWT middleware
-  [2] test(auth): add unit tests for JWT
-  [3] chore(deps): add jsonwebtoken package
+  [1] #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with terragrunt linting
+  [2] #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with yaml linting
 
-Proceed with all 3? (yes / no — commit as one)
+Proceed with all 2? (yes / no — commit as one)
 ```
 
 ```
-✔ feat(auth): add JWT middleware
-✔ test(auth): add unit tests for JWT
-✔ chore(deps): add jsonwebtoken package
+✔ #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with terragrunt linting
+✔ #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with yaml linting
 
-3 commits created on branch feat/AUTH-42-jwt-auth
-Co-authored-by: Sayeed <sayeed@JohnDeere.com>
+2 commits created on branch feat/EPPT-3927-pre-merge-checks
 ```
