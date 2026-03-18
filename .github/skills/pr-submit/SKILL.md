@@ -101,14 +101,30 @@ If no ticket ID has been derived, inform the user:
    > "There are WIP/fixup commits on this branch. Do you want to squash them before submitting? (recommended)"
    - If yes: guide the user to run `git rebase -i $BASE_BRANCH` and squash to a single meaningful commit.
    - If no: proceed.
-4. Scan for ignoreable files being committed. Run `git diff $BASE_BRANCH..HEAD --name-only` and check whether any listed files match:
-   - Patterns declared in `.gitignore` (if the file exists in the repo root)
-   - Common build artifacts: `node_modules/`, `dist/`, `build/`, `*.log`, `.env`
+4. **Scan for ignorable files being committed — this step is mandatory and must not be skipped.**
 
-   If any matches are found, warn the user:
-   > "The following files appear to be build artifacts or should be ignored: `<files>`. Do you want to remove them before submitting?"
-   - If yes: help the user run `git rm --cached <file>` for each offending file and amend the relevant commit.
-   - If no: proceed.
+   a. Collect the list of changed files:
+      ```bash
+      CHANGED_FILES=$(git diff $BASE_BRANCH..HEAD --name-only)
+      ```
+
+   b. Check each changed file against `.gitignore` patterns using `git check-ignore`:
+      ```bash
+      echo "$CHANGED_FILES" | xargs git check-ignore --no-index
+      ```
+      `git check-ignore --no-index` tests paths against the `.gitignore` rules regardless of whether the file is already tracked. Any file printed by this command is matched by a `.gitignore` pattern and should not be in the PR.
+
+   c. Additionally, check for common build artifacts that may not be in `.gitignore`:
+      ```bash
+      echo "$CHANGED_FILES" | grep -E '(node_modules/|dist/|build/|\.log$|\.env$)'
+      ```
+
+   d. Combine the results from (b) and (c). If **any** matches are found, warn the user:
+      > "The following files appear to be build artifacts or should be ignored:
+      > `<files>`
+      > Do you want to remove them before submitting?"
+      - If yes: help the user run `git rm --cached <file>` for each offending file and amend the relevant commit.
+      - If no: proceed.
 
 ---
 
