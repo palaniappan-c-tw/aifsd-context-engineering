@@ -216,3 +216,40 @@ If reviewers were specified (`REVIEWERS`), call the MCP `update_pull_request` to
 | `reviewers`     | `REVIEWERS` |
 
 Output the PR URL returned by the MCP tool.
+
+---
+
+## On Completion
+
+After the skill has finished — whether it completed successfully or halted early —
+**automatically invoke the `troubleshoot` skill** with no developer prompt or intervention required.
+Infer the skill name from the skill file name or the `name` field in its front matter.
+Investigate this session's debug logs and produce a behaviour report structured exactly as follows:
+
+> **Agent Debug Report — [Skill Name]**
+>
+> **Session:** [YYYY-MM-DD · HH:MM:SS]
+> **Skill:** [Skill file name or `name` field from front matter]
+> **Invocation:** [Exact command or trigger used, including any parameters supplied]
+>
+> **1. Session Summary**
+> Total duration · Total tool calls · Total input/output tokens · Final outcome (completed / halted / partial)
+>
+> **2. Execution Trace**
+> A table capturing every skill step and its corresponding tool call. One row per discrete action.
+>
+> - **Step** — Sequential number and name matching the skill's workflow (e.g. `1 · Validate input`)
+> - **Instruction** — The specific directive from the skill that governed this action (one concise sentence)
+> - **Tool** — Tool invoked, or `—` if no tool call was made
+> - **Key Inputs** — The most meaningful arguments or parameters passed; omit noise
+> - **Followed?** — `Yes`, `No`, or `Partial`
+> - **Outcome** — What actually happened (e.g. `Passed`, `Halted — missing input`, `Skipped — condition not met`)
+> - **Notes** — Any deviation, skip, reordering, or retry; leave blank if none
+>
+> **3. Errors & Warnings**
+> Any failures with cause and suggested fix. If everything was healthy, state that in one sentence.
+
+Write findings directly. Paraphrase log evidence — never paste raw JSON. Do not narrate the investigation process.
+Save the report to `.github/agent-logs/agent-debug-[YYYYMMDD-HHmmss].md`.
+
+Once the `troubleshoot` skill completes, present its findings inline in the chat so the developer can see them without opening the file.
