@@ -59,12 +59,20 @@ This repo organizes project context into distinct layers, each mapped to a nativ
 │       └── integrations-sample.md
 │
 └── skills/                              #   On-demand workflows
-    ├── story-to-code/                   #   Workflow: Jira story → implementation
+    ├── commit/                          #   Workflow: stage, analyse, and commit changes
     │   ├── SKILL.md
-    │   └── story-analysis-template.md
-    └── code-review/                     #   Workflow: structured code review
-        ├── SKILL.md
-        └── review-checklist.md
+    │   ├── README.md
+    │   └── references/                  #   Atomicity guide & commit standards
+    ├── pr-review/                       #   Workflow: parallel subagent PR review
+    │   ├── SKILL.md
+    │   └── README.md
+    ├── pr-submit/                       #   Workflow: prepare and submit a GitHub PR
+    │   ├── SKILL.md
+    │   └── README.md
+    └── archived/                        #   Retired skills kept for reference
+        ├── story-to-code/
+        ├── code-review/
+        └── exception-handling/
 ```
 
 ## What Goes Where
@@ -116,9 +124,12 @@ See the `samples/` subfolder for a complete e-commerce example. The AI maintenan
 
 ### 5. Customize the skills
 
-- **`story-to-code/`** — Adjust the workflow steps to match your team's development process.
-- **`code-review/`** — Update the checklist to reflect your team's priorities.
+- **`commit/`** — Adjust atomicity rules, commit message format, and author identity checks to match your team's standards.
+- **`pr-review/`** — Configure which subagents run (code quality, tests, error handling, type design) and the base branch defaults.
+- **`pr-submit/`** — Update PR title/description templates, required reviewers, and CI gate rules.
 - Add new skills for workflows specific to your project.
+
+All three active skills include an **On Completion** task that automatically invokes the `troubleshoot` skill to generate an Agent Debug Report after every run. Reports are saved to `.github/agent-logs/agent-debug-[YYYYMMDD-HHmmss].md` and surfaced inline in the chat.
 
 ### 6. Commit and iterate
 
