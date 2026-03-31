@@ -53,6 +53,7 @@ This repo organizes project context into distinct layers, each mapped to a nativ
 │   └── database.instructions.md         #   applyTo: **/db/migration/**, *.sql — Flyway & schema rules
 │
 ├── agents/                              #   Custom agent personas
+│   ├── pr-review.md                     #   PR review orchestrator (spawns subagents)
 │   ├── code-reviewer.md                 #   Lightweight code quality reviewer
 │   ├── pr-test-analyzer.md              #   Test coverage & quality analyzer
 │   ├── silent-failure-hunter.md         #   Detects swallowed exceptions & missing error handling
@@ -80,13 +81,11 @@ This repo organizes project context into distinct layers, each mapped to a nativ
     │   ├── SKILL.md
     │   ├── README.md
     │   └── references/                  #   Atomicity guide & commit standards
-    ├── pr-review/                       #   Workflow: parallel subagent PR review
-    │   ├── SKILL.md
-    │   └── README.md
     ├── pr-submit/                       #   Workflow: prepare and submit a GitHub PR
     │   ├── SKILL.md
     │   └── README.md
     └── archived/                        #   Retired skills kept for reference
+        ├── pr-review/                   #   Promoted to agents/pr-review.md
         ├── story-to-code/
         ├── code-review/
         └── exception-handling/
@@ -143,7 +142,6 @@ See the `samples/` subfolder for a complete e-commerce example. The AI maintenan
 ### 5. Customize the skills
 
 - **`commit/`** — Adjust atomicity rules, commit message format, and author identity checks to match your team's standards.
-- **`pr-review/`** — Configure which subagents run (code quality, tests, error handling, type design) and the base branch defaults.
 - **`pr-submit/`** — Update PR title/description templates, required reviewers, and CI gate rules.
 - Add new skills for workflows specific to your project.
 
@@ -152,6 +150,7 @@ All three active skills include an **On Completion** task that automatically inv
 ### 6. Customize the agents
 
 Agents are reusable personas that can be invoked as subagents by skills or directly by the user:
+- **`pr-review.md`** — PR review orchestrator that spawns parallel subagents (code-reviewer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer) and runs the project build. Configure which subagents run, the base branch default, and build tool preferences.
 - **`code-reviewer.md`** — Lightweight single-pass code quality reviewer for pre-commit/pre-PR checks.
 - **`pr-test-analyzer.md`** — Analyses test coverage, edge cases, and assertion quality.
 - **`silent-failure-hunter.md`** — Hunts for swallowed exceptions and missing error handling.
