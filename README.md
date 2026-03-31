@@ -31,10 +31,15 @@ This repo organizes project context into distinct layers, each mapped to a nativ
 │  Loaded when the AI determines the task is relevant.          │
 │  Step-by-step workflows that orchestrate domain knowledge.    │
 │  Progressive: metadata → instructions → resources.            │
+├─────────────────────────────────────────────────────────────────┤
+│  Custom Agents (agents/*.md)                                  │
+│  Reusable personas with dedicated tools and instructions.     │
+│  Invoked as subagents by skills or directly by the user.      │
+│  Each agent owns a single concern (review, security, tests).  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Design principle**: Memory owns the **content** (pure domain knowledge), skills own the **orchestration** (when and which memory files to pull in). Each layer loads only when needed, keeping the AI's context window efficient.
+**Design principle**: Memory owns the **content** (pure domain knowledge), skills own the **orchestration** (when and which memory files to pull in), and agents own **specialised personas** that skills can delegate to. Each layer loads only when needed, keeping the AI's context window efficient.
 
 ## Structure
 
@@ -46,6 +51,18 @@ This repo organizes project context into distinct layers, each mapped to a nativ
 │   ├── java.instructions.md             #   applyTo: **/*.java — Spring Boot conventions
 │   ├── test.instructions.md             #   applyTo: **/*Test.java, *IT.java — testing standards
 │   └── database.instructions.md         #   applyTo: **/db/migration/**, *.sql — Flyway & schema rules
+│
+├── agents/                              #   Custom agent personas
+│   ├── code-reviewer.md                 #   Lightweight code quality reviewer
+│   ├── pr-test-analyzer.md              #   Test coverage & quality analyzer
+│   ├── silent-failure-hunter.md         #   Detects swallowed exceptions & missing error handling
+│   ├── type-design-analyzer.md          #   Reviews type/model design quality
+│   ├── security-reviewer.md             #   End-to-end security audit orchestrator (Burp MCP)
+│   └── security-review-instructions/    #   Subagent instructions for security checks
+│       ├── recon.md, headers.md, fingerprint.md
+│       ├── cors.md, cookie-flags.md, cookie-expiry.md
+│       ├── https.md, idor.md, sqli-json.md
+│       └── numeric-boundary.md
 │
 ├── memory/                              #   Domain knowledge
 │   ├── MEMORY.md                        #   Index + memory maintenance protocol
@@ -83,6 +100,7 @@ This repo organizes project context into distinct layers, each mapped to a nativ
 | Should the AI know this **when touching specific file types**? | Language coding standards, framework patterns | `instructions/*.instructions.md` |
 | Should the AI know this **when doing a specific task**? | Step-by-step workflows, templates | `skills/*/SKILL.md` |
 | Should the AI know this **when generating domain-aware code**? | Domain entities, rules, integration contracts | `memory/MEMORY.md` |
+| Should the AI **act as a specialised persona**? | Focused reviewers, security auditors, test analyzers | `agents/*.md` |
 
 ## How to Adopt
 
@@ -131,7 +149,18 @@ See the `samples/` subfolder for a complete e-commerce example. The AI maintenan
 
 All three active skills include an **On Completion** task that automatically invokes the `troubleshoot` skill to generate an Agent Debug Report after every run. Reports are saved to `.github/agent-logs/agent-debug-[YYYYMMDD-HHmmss].md` and surfaced inline in the chat.
 
-### 6. Commit and iterate
+### 6. Customize the agents
+
+Agents are reusable personas that can be invoked as subagents by skills or directly by the user:
+- **`code-reviewer.md`** — Lightweight single-pass code quality reviewer for pre-commit/pre-PR checks.
+- **`pr-test-analyzer.md`** — Analyses test coverage, edge cases, and assertion quality.
+- **`silent-failure-hunter.md`** — Hunts for swallowed exceptions and missing error handling.
+- **`type-design-analyzer.md`** — Reviews type/model design for encapsulation and invariant enforcement.
+- **`security-reviewer.md`** — End-to-end security audit orchestrator that uses Burp Suite MCP tools, spawns parallel subagents for passive and active security checks, and aggregates findings into a structured report.
+
+The security reviewer includes its own `security-review-instructions/` subfolder with dedicated instruction files for each check type (recon, headers, CORS, cookies, IDOR, SQLi, etc.).
+
+### 7. Commit and iterate
 
 Commit the `.github/` folder to your repo. Context engineering is iterative — start with the basics and refine as you observe Copilot's behaviour.
 
@@ -146,12 +175,12 @@ Commit the `.github/` folder to your repo. Context engineering is iterative — 
 
 These context files work across all GitHub Copilot modes:
 
-| Mode | `copilot-instructions.md` | `*.instructions.md` | Memory (`MEMORY.md`) | Skills (`SKILL.md`) |
-|------|:---:|:---:|:---:|:---:|
-| Copilot Chat (Ask/Edit) | ✅ | ✅ | ✅ | ✅ |
-| Agent Mode (VS Code) | ✅ | ✅ | ✅ | ✅ |
-| Coding Agent (Cloud) | ✅ | ✅ | ✅ | ✅ |
-| GitHub CLI | ✅ | ✅ | ✅ | ✅ |
+| Mode | `copilot-instructions.md` | `*.instructions.md` | Memory (`MEMORY.md`) | Skills (`SKILL.md`) | Agents (`agents/*.md`) |
+|------|:---:|:---:|:---:|:---:|:---:|
+| Copilot Chat (Ask/Edit) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Agent Mode (VS Code) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Coding Agent (Cloud) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| GitHub CLI | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## References
 
