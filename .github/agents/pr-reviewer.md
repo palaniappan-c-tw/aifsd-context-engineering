@@ -1,18 +1,26 @@
 ---
-name: pr-review
+name: pr-reviewer
 description: >
-  Comprehensive PR review workflow that orchestrates parallel subagent analysis
-  across code quality, test coverage, error handling, and type design — then runs
-  a project build to validate readiness. Use this skill whenever someone mentions
-  reviewing a pull request or branch, including phrases like "review my PR",
-  "check this PR", "review this pull request", "is this ready to merge",
-  "review changes on this branch", or any request to assess code changes before
-  merging. Also trigger for softer cues like "can you look at my changes",
-  "is my branch good to go", or "check my diff" — even if the word "PR" isn't
-  used explicitly.
+  Comprehensive PR review orchestrator that spawns parallel subagent analysis
+  across code quality, test coverage, error handling, and type design — then
+  runs a project build to validate readiness. Use this agent whenever someone
+  mentions reviewing a pull request or branch, including phrases like "review
+  my PR", "check this PR", "review this pull request", "is this ready to
+  merge", "review changes on this branch", or any request to assess code
+  changes before merging. Also trigger for softer cues like "can you look at
+  my changes", "is my branch good to go", or "check my diff" — even if the
+  word "PR" isn't used explicitly.
 argument-hint: "[branch:<name>] [code|tests|errors|types|all] [maven]"
+tools: ['execute', 'read', 'search', 'agent']
+agents: ['pr-code-reviewer', 'pr-test-analyzer', 'pr-silent-failure-hunter', 'pr-type-design-analyzer']
+user-invocable: true
+disable-model-invocation: false
+handoffs:
+  - label: Fix Review Findings
+    agent: agent
+    prompt: 'Start implementation to fix review findings'
+    send: false
 ---
-
 
 # PR Review
 
@@ -62,7 +70,8 @@ Produce a concrete list — actual file paths that exist on disk.
 Rules:
 - `copilot-instructions.md` is always included for every file regardless of
   extension.
-- If a resolved instruction file does not exist on disk, skip it and record the gap. Example: "No `python.instructions.md` found — falling back to
+- If a resolved instruction file does not exist on disk, skip it and record the
+  gap. Example: "No `python.instructions.md` found — falling back to
   `copilot-instructions.md` only for `.py` files." Report gaps in the final
   output under a `### Instruction File Gaps` section.
 - Never fail silently. A missing instruction file is noted, not ignored.
@@ -214,25 +223,25 @@ Approved / Changes Required
 
 ## On Completion
 
-After the skill has finished — whether it completed successfully or halted early —
+After the agent has finished — whether it completed successfully or halted early —
 **automatically invoke the `troubleshoot` skill** with no developer prompt or intervention required.
-Infer the skill name from the skill file name or the `name` field in its front matter.
+Infer the agent name from the `name` field in the front matter.
 Investigate this session's debug logs and produce a behaviour report structured exactly as follows:
 
-> **Agent Debug Report — [Skill Name]**
+> **Agent Debug Report — [Agent Name]**
 >
 > **Session:** [YYYY-MM-DD · HH:MM:SS]
-> **Skill:** [Skill file name or `name` field from front matter]
+> **Agent:** [`name` field from front matter]
 > **Invocation:** [Exact command or trigger used, including any parameters supplied]
 >
 > **1. Session Summary**
 > Total duration · Total tool calls · Total input/output tokens · Final outcome (completed / halted / partial)
 >
 > **2. Execution Trace**
-> A table capturing every skill step and its corresponding tool call. One row per discrete action.
+> A table capturing every agent phase/step and its corresponding tool call. One row per discrete action.
 >
-> - **Step** — Sequential number and name matching the skill's workflow (e.g. `1 · Validate input`)
-> - **Instruction** — The specific directive from the skill that governed this action (one concise sentence)
+> - **Step** — Sequential number and name matching the agent's workflow (e.g. `1 · Collect the diff`)
+> - **Instruction** — The specific directive from the agent that governed this action (one concise sentence)
 > - **Tool** — Tool invoked, or `—` if no tool call was made
 > - **Key Inputs** — The most meaningful arguments or parameters passed; omit noise
 > - **Followed?** — `Yes`, `No`, or `Partial`

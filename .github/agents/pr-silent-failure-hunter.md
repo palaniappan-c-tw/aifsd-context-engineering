@@ -1,5 +1,5 @@
 ---
-name: silent-failure-hunter
+name: pr-silent-failure-hunter
 description: >
   Hunts for silent failures, swallowed exceptions, missing error logging, and
   inadequate error handling in changed code. Language-agnostic. Use when asked

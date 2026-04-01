@@ -1,8 +1,12 @@
 ---
 name: security-reviewer
 description: End-to-end security audit agent using Burp MCP tools with parallel subagents
-tools: [execute, read, agent, edit, search, web, browser, 'burpsuite-mcp/*', todo]  
-
+tools: [execute, read, agent, edit, search, web, browser, 'burpsuite-mcp/*', todo]
+handoffs:
+  - label: 'Plan Remediation'
+    agent: agent
+    prompt: ''
+    send: false
 ---
 
 # ROLE

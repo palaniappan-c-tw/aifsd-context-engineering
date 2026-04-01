@@ -15,7 +15,7 @@ Produce clean, well-structured git commits by following a six-step workflow:
 
 1. **Stage & collect** — runs `git add -A` and captures the full diff
 2. **Validate identity** — enforces `@JohnDeere.com` email for the author before proceeding
-3. **Resolve story reference** — determines the story number / `nocard` tag to use
+3. **Resolve story reference** — determines the story number / `#NoCard` tag to use
 4. **Analyse atomicity** — determines whether the diff represents a single logical change or multiple unrelated concerns
 5. **Commit (single)** — if atomic, generates and executes one commit immediately with no approval needed
 6. **Commit (split)** — if non-atomic, proposes a numbered list of atomic commits for the developer to confirm; falls back to a single commit on rejection
@@ -25,13 +25,13 @@ Produce clean, well-structured git commits by following a six-step workflow:
 ## Parameters
 
 ```
-/commit [story=<BOARD-NUM> | nocard] [authors=<Name1>, <Name2>, ...]
+/commit [story=<BOARD-NUM> | #NoCard] [authors=<Name1>, <Name2>, ...]
 ```
 
 | Parameter | Description |
 |-----------|-------------|
 | `story=DIAG-123` | Jira / issue reference to embed in the commit message |
-| `nocard` | Explicitly marks the commit as having no linked story |
+| `#NoCard` | Explicitly marks the commit as having no linked story |
 | `authors=Name1, Name2` | One or more developer names to place in square brackets. Names only — no emails required. |
 
 **Examples**
@@ -39,7 +39,7 @@ Produce clean, well-structured git commits by following a six-step workflow:
 ```
 /commit story=DIAG-000 authors=Prajwal
 /commit story=EPPT-3927 authors=Johny, Prashant
-/commit nocard authors=Palani
+/commit #NoCard authors=Palani
 /commit authors=Ravi          ← story reference not provided; see Step 3
 ```
 
@@ -65,16 +65,16 @@ If it does not, halt immediately and tell the developer which email is invalid.
 
 ### Step 3 — Resolve story reference
 
-If neither `story=` nor `nocard` was supplied, pause and ask:
+If neither `story=` nor `#NoCard` was supplied, pause and ask:
 
 ```
 No story number provided. How would you like to proceed?
   [1] Enter a story number (e.g. DIAG-123)
-  [2] Continue with #nocard
+  [2] Continue with #NoCard
 ```
 
 - If the developer provides a story number, use `#<STORY-NUM>` as the prefix.
-- If the developer chooses `nocard` (or types `2`), use `#nocard` as the prefix.
+- If the developer chooses `NoCard` (or types `2`), use `#NoCard` as the prefix.
 - Do not proceed until one of the two options is confirmed.
 
 ---
@@ -122,7 +122,7 @@ All messages must follow this exact structure:
 | Segment | Rules |
 |---------|-------|
 | `#<STORY-NUM>` | Jira/issue key, e.g. `#DIAG-000`, `#EPPT-3927` |
-| `#nocard` | Used when no story is linked |
+| `#NoCard` | Used when no story is linked |
 | `[<Author(s)>]` | Comma-separated names in square brackets, e.g. `[Prajwal]` or `[Johny, Prashant]`. Omit if no `authors=` argument was given. |
 | `<short description>` | Imperative mood, sentence case, no trailing period, max 72 chars total per line |
 
@@ -131,7 +131,7 @@ All messages must follow this exact structure:
 ```
 #DIAG-000 [Prajwal] CVE-2025-12543 Trivy vulnerability fix
 #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with terragrunt and yaml linting
-#nocard [Palani] Update docs
+#NoCard [Palani] Update docs
 ```
 
 Add a **body** only when the change needs additional context (e.g. breaking changes or non-obvious reasoning). No `Co-authored-by` trailers are appended.

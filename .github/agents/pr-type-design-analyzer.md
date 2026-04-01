@@ -1,5 +1,5 @@
 ---
-name: type-design-analyzer
+name: pr-type-design-analyzer
 description: >
   Analyses the design quality of types, models, entities, DTOs, and value
   objects introduced or changed in a PR. Rates encapsulation, invariant

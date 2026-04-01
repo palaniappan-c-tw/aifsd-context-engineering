@@ -17,11 +17,7 @@ Commit staged and unstaged changes with atomic analysis and generated commit mes
 
 ## Prerequisites
 
-| Requirement | Details |
-|---|---|
-| **Git** | `git` must be installed and the working directory must be inside a git repository |
-| **Configured author identity** | `git config user.email` must be set to a `@JohnDeere.com` address |
-| **At least one change** | The repository must have staged or unstaged changes — otherwise there is nothing to commit |
+**Git**: `git` must be installed and the working directory must be inside a git repository 
 
 ---
 
@@ -55,7 +51,7 @@ Provide a story reference and credit your collaborators at invocation:
 /commit nocard authors=Palani
 ```
 
-All parameters are optional — if `story=` or `nocard` is omitted the skill will ask before proceeding.
+All parameters are optional — if `story=` or `#NoCard` is omitted the skill will ask before proceeding.
 
 ---
 
@@ -67,48 +63,3 @@ All parameters are optional — if `story=` or `nocard` is omitted the skill wil
 4. **Analyses atomicity** — determines whether the diff represents one logical unit of work or several.
 5. **Single change** — generates one commit message and executes immediately, no approval needed.
 6. **Multiple changes** — proposes a numbered list of atomic commits for your approval; executes all in sequence on yes, or falls back to a single commit on no.
-
----
-
-## Commit Message Format
-
-```
-#<STORY-NUM|nocard> [<Author(s)>] <short description>
-```
-
-| Segment | Details |
-|---|---|
-| `#STORY-NUM` | Jira / issue key, e.g. `#DIAG-000`, `#EPPT-3927` |
-| `#nocard` | Used when the commit is not linked to a story |
-| `[Author(s)]` | Comma-separated names in square brackets — included only when `authors=` is provided |
-| `description` | Imperative mood, sentence case, no trailing period, max 72 chars |
-
----
-
-## Pre-commit Checks Summary
-
-| Check | Behaviour on Failure |
-|---|---|
-| Author email (`@JohnDeere.com`) | Halt. Warn developer. Do not commit. |
-| No changes present | Exit with "Nothing to commit" message. |
-| Story reference missing | Pause and ask: supply a story number or confirm `#nocard`. |
-| Developer rejects atomic split | Fall back to a single commit covering all changes. |
-
----
-
-## Example Output
-
-```
-Proposed atomic commits:
-  [1] #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with terragrunt linting
-  [2] #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with yaml linting
-
-Proceed with all 2? (yes / no — commit as one)
-```
-
-```
-✔ #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with terragrunt linting
-✔ #EPPT-3927 [Johny, Prashant] Extend pre-merge checks with yaml linting
-
-2 commits created on branch feat/EPPT-3927-pre-merge-checks
-```

@@ -17,12 +17,11 @@ Raise a well-formed GitHub Pull Request without leaving editor/IDE — no GitHub
 
 ## Prerequisites
 
-| Requirement | Details |
-|---|---|
-| **GitHub MCP server** | Must be configured and authenticated in VS Code. The skill uses the `create_pull_request` and `request_reviewers` MCP tools to interact with GitHub. |
-| **Git** | `git` must be installed and the repository must have a remote named `origin` pointing to GitHub. |
-| **Authenticated remote** | Your local Git must have push access to `origin` (SSH key or HTTPS credential configured). |
-| **At least one commit ahead of base** | The branch must have commits not yet on the base branch — otherwise there is nothing to PR. |
+- **GitHub MCP server**: Must be configured and authenticated in VS Code. The skill uses the `create_pull_request` and `request_reviewers` MCP tools to interact with GitHub.
+
+- **Git**: `git` must be installed and the repository must have a remote named `origin` pointing to GitHub.
+
+- **Authenticated remote**: Your local Git must have push access to `origin` (SSH key or HTTPS credential configured).
 
 ---
 
@@ -61,28 +60,3 @@ raise a PR, reviewer: @alice @bob
 7. **Pushes the branch** to origin if not already pushed.
 8. **Creates the PR** via the GitHub MCP tool and returns the PR URL.
 9. **Assigns reviewers** if specified at invocation.
-
----
-
-## Pre-submit Checks Summary
-
-| Check | Behaviour on Failure |
-|---|---|
-| Branch name convention | Warn and ask to proceed or rename |
-| WIP / fixup commits | Offer to squash via interactive rebase |
-| Ignored / artifact files in diff | List offending files and offer to remove with `git rm --cached` |
-
----
-
-## Example Output
-
-```
-PR created: https://github.com/org/repo/pull/42
-
-Title : [AUTH-42] Add JWT refresh token endpoint
-
-Change Summary:
-- Add refresh token generation on login
-- Validate token expiry on protected routes
-- Add unit tests for token service
-```

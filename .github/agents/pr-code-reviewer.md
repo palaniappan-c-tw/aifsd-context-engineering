@@ -1,5 +1,5 @@
 ---
-name: code-reviewer
+name: pr-code-reviewer
 description: >
   Reviews code quality, style, naming, layering, security, and compliance with
   project instruction files. Use this for pre-commit and pre-PR checks —
