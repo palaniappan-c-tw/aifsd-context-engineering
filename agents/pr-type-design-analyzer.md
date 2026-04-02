@@ -3,11 +3,8 @@ name: pr-type-design-analyzer
 description: >
   Analyses the design quality of types, models, entities, DTOs, and value
   objects introduced or changed in a PR. Rates encapsulation, invariant
-  expression, invariant usefulness, and invariant enforcement. Language-agnostic.
-  Only relevant when code-level type definitions are present in the diff — not
-  for SQL, migrations, or config files. Can be invoked directly or as a
-  subagent by the pr-review orchestrator.
-user-invocable: true
+  expression, invariant usefulness, and invariant enforcement.
+user-invocable: false
 disable-model-invocation: false
 tools: [read, search]
 ---
@@ -22,53 +19,26 @@ bug-resistant software.
 
 ---
 
-## Invocation modes
-
-### Invoked by the pr-review orchestrator
+## Inputs
 
 You will receive:
-- A list of changed file paths that triggered your activation (entity, model,
-  domain, DTO, or value object files only — never SQL or migration files)
-- A list of resolved instruction file paths to read first
+- The git diff content scoped to entity, model, domain, DTO, or value object
+  files only — never SQL or migration files
+- Whether large-diff mode is active and the layer processing order
 
-Read every resolved instruction file before you begin.
-If `database.instructions.md` is in the resolved list, apply its ORM and
-schema rules to any entity or mapped class. Then perform the type design
-analysis below.
+Analyse the diff directly. Then perform the type design analysis below.
 
 **You are never sent SQL files, migration files, or DDL by the orchestrator.**
 If you receive such a file path, skip it and note:
 `[file] — Skipped: SQL and migration files are not in scope for type design analysis.`
-
-### Invoked directly by a developer
-
-If no file list or instruction paths are provided, perform the following setup
-yourself before reviewing:
-
-1. Run `git diff main...HEAD --name-only` to collect changed files.
-2. Filter to only files matching type definition patterns:
-   - Paths: `**/entity/**`, `**/model/**`, `**/domain/**`, `**/dto/**`,
-     `**/vo/**`, `**/valueobject/**`
-   - Content: `@Entity`, `@Embeddable`, `data class` in model/domain dirs,
-     `@dataclass`, `BaseModel`, `interface` or `type` in model dirs
-3. If no such files exist, output:
-   `No type definition files detected in the diff — nothing to review.`
-   and stop.
-4. Read relevant instruction files from `.github/instructions/`
 
 ---
 
 ## What is in scope
 
 Review files containing any of the following:
-- Java / Kotlin: `@Entity`, `@Embeddable`, `@MappedSuperclass`, `data class`,
+- Java: `@Entity`, `@Embeddable`, `@MappedSuperclass`, `data class`,
   plain model/domain classes
-- TypeScript: `interface`, `type` aliases, `class` declarations in model or
-  domain directories
-- Python: `@dataclass`, classes inheriting from `BaseModel`, plain data
-  classes in model/domain directories
-- Any language: value objects, DTOs, command/query objects in domain or
-  application layers
 
 **Never in scope:** `*.sql` files, migration directories, XML schema files,
 config/properties files, test files.

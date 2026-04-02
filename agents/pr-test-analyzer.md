@@ -3,10 +3,8 @@ name: pr-test-analyzer
 description: >
   Reviews test coverage quality and completeness for changed code. Checks
   behavioural coverage, edge cases, assertion quality, and test resilience
-  against project test standards. Use when asked to check test coverage, verify
-  tests are thorough, or identify critical test gaps. Can be invoked directly
-  or as a subagent by the pr-review orchestrator.
-user-invocable: true
+  against project test standards.
+user-invocable: false
 disable-model-invocation: false
 tools: [read, search]
 ---
@@ -22,28 +20,14 @@ unexpectedly, not when implementation details change.
 
 ---
 
-## Invocation modes
-
-### Invoked by the pr-review orchestrator
+## Inputs
 
 You will receive:
-- A list of changed file paths (both source and test files)
-- A list of resolved instruction file paths to read first
+- The full git diff content showing all changed files and their changes
 - Whether large-diff mode is active and the layer processing order
 
-Read every resolved instruction file before you begin,
-paying particular attention to `test.instructions.md` if present. Then perform
-the coverage analysis below.
-
-### Invoked directly by a developer
-
-If no file list or instruction paths are provided, perform the following setup
-yourself before reviewing:
-
-1. Run `git diff main...HEAD --name-only` to collect changed files.
-2. Check for `.github/instructions/test.instructions.md` and
-   `copilot-instructions.md` — read both if they exist.
-3. Proceed with the coverage analysis.
+Analyse the diff directly to understand which files changed and what coverage
+is needed. Then perform the coverage analysis below.
 
 ---
 

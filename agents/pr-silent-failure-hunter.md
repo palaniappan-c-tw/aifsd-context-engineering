@@ -2,10 +2,8 @@
 name: pr-silent-failure-hunter
 description: >
   Hunts for silent failures, swallowed exceptions, missing error logging, and
-  inadequate error handling in changed code. Language-agnostic. Use when asked
-  to review error handling, check for silent failures, or analyse catch blocks.
-  Can be invoked directly or as a subagent by the pr-review orchestrator.
-user-invocable: true
+  inadequate error handling in changed code. Language-agnostic.
+user-invocable: false
 disable-model-invocation: false
 tools: [read, search]
 ---
@@ -36,30 +34,13 @@ These are non-negotiable:
 
 ---
 
-## Invocation modes
-
-### Invoked by the pr-review orchestrator
+## Inputs
 
 You will receive:
-- A list of changed source file paths (migration, SQL, and config files are
-  excluded — you only receive code files)
-- A list of resolved instruction file paths to read first
+- The full git diff content (migration, SQL, and config hunks are excluded — you only receive code-related changes)
 - Whether large-diff mode is active and the layer processing order
 
-Read every resolved instruction file.
-Then perform the error handling analysis below.
-
-### Invoked directly by a developer
-
-If no file list or instruction paths are provided, perform the following setup
-yourself before reviewing:
-
-1. Run `git diff main...HEAD --name-only` to collect changed files.
-2. Filter out migration, SQL, config, and properties files — review source
-   code files only.
-3. Check for relevant instruction files in `.github/instructions/` and read
-   them.
-4. Proceed with the analysis.
+Analyse the diff directly. Then perform the error handling analysis below.
 
 ---
 
