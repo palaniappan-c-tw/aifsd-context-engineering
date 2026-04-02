@@ -1,6 +1,6 @@
 # PR-REVIEW AGENT
 
-Comprehensive pull request review agent orchestrating code quality, test coverage, error handling, and type design analysis subagents.
+Runs a multi-perspective review of your pull request — code quality, test coverage, silent failures, and type design — in a single pass.
 
 ---
 
@@ -9,11 +9,8 @@ Comprehensive pull request review agent orchestrating code quality, test coverag
 | Pain Point | What This Agent Does |
 |---|---|
 | Manually reviewing PRs across multiple dimensions | Spawns specialised subagents in parallel for code quality, test coverage, silent failures, and type design — giving you a multi-perspective review in one pass |
-| Overlooking silent failures and swallowed exceptions | Runs a dedicated `pr-silent-failure-hunter` subagent that scans for missing error logging, empty catch blocks, and inadequate error handling |
-| Unclear whether tests cover the changed code | Runs a `pr-test-analyzer` subagent that cross-references source changes against their tests and rates coverage gaps |
 | Forgetting to build before merging | Automatically detects the build tool (Gradle or Maven) and runs the build concurrently with the review |
 | Inconsistent review standards | Resolves project instruction files (`.github/instructions/`) for every changed file and passes them to each subagent, ensuring reviews align with project conventions |
-| No visibility into agent behaviour | Automatically invokes the `troubleshoot` skill on completion and generates a structured debug report |
 
 ---
 
@@ -25,55 +22,10 @@ Comprehensive pull request review agent orchestrating code quality, test coverag
 
 ## How to Use
 
-Trigger the agent in Copilot Chat:
+In VS Code, open **Copilot Chat** and switch to the `pr-reviewer` agent. You can do this by:
 
-```
-review my PR
-```
-
-```
-review this pull request
-```
-
-```
-is this ready to merge
-```
-
-```
-review changes on this branch for merging
-```
-
-Softer cues are also recognised:
-
-```
-can you look at my changes
-```
-
-```
-is my branch good to go
-```
-
-```
-check my diff
-```
-
-Optionally, scope the review or override defaults:
-
-```
-review my PR code tests
-```
-
-```
-review my PR branch:develop
-```
-
-```
-review my PR maven
-```
-
-```
-review my PR tests errors branch:develop
-```
+- Selecting `pr-reviewer` from the agent/mode picker dropdown in Chat, **or**
+- Typing `/agents` in the Chat input and selecting `pr-reviewer`
 
 ---
 
@@ -96,7 +48,7 @@ Multiple arguments can be combined: e.g. `tests errors branch:develop`.
 
 ## What Happens Under the Hood
 
-### Phase 1 — Setup (sequential)
+### Phase 1 — Setup
 
 1. **Collects the diff** against the base branch (`git diff <base>...HEAD --name-only`) and identifies all changed files. Then counts diff lines to detect large diffs.
 2. **Detects large diffs** (500+ lines) and switches to a layered processing order: `domain/model → service → controller → repository → test`. This ordering is passed to all subagents.
@@ -140,66 +92,3 @@ Multiple arguments can be combined: e.g. `tests errors branch:develop`.
 | `pr-test-analyzer` | All changed files (cross-references source ↔ tests) — checks behavioural coverage, edge cases, assertion quality (DAMP), and test resilience. Rates gaps 1–10. | Yes | `read`, `search` | Yes |
 | `pr-silent-failure-hunter` | All changed source files excluding migration/SQL/config — hunts for empty catch blocks, swallowed exceptions, missing error logging, unjustified fallbacks, broad exception catches. Rates CRITICAL/HIGH/MEDIUM. | Yes | `read`, `search` | Yes |
 | `pr-type-design-analyzer` | Only entity, model, domain, dto, vo files — rates encapsulation, invariant expression, invariant usefulness, and invariant enforcement (each 1–10). Never reviews SQL or migration files. | No — only when matching files are in the diff | `read`, `search` | Yes |
-
----
-
-## Output Format
-
-### Violations
-
-Findings grouped by severity:
-
-- **Critical (must fix before merge)** — code issues scored 90–100, coverage gaps rated 9–10, critical silent failures, type design scores 1–3 on any dimension
-- **Important (should fix)** — code issues scored 80–89, coverage gaps rated 7–8, high silent failures, type design scores 4–5 on any dimension
-- **Suggestions (nice to have)** — coverage gaps rated 1–6, medium silent failures, all lower-severity findings
-
-### Instruction File Gaps
-
-Any expected instruction files not found on disk.
-
-### Subagent Failures
-
-Any subagent that failed to return results — noted with cause if available. Omitted when all subagents succeed.
-
-### Build
-
-Pass or Fail with details on compilation errors or test failures.
-
-### Verdict
-
-`Approved` or `Changes Required` with a one-sentence reason.
-
-### Agent Debug Report
-
-Auto-generated troubleshoot report including session summary, execution trace, and errors. Also saved to `.github/agent-logs/`.
-
----
-
-## Example Output
-
-```
-### Violations
-
-**Critical (must fix before merge)**
-- [UserService.java:42] — Unchecked null return — java.instructions.md — [subagent: code-reviewer] — 95
-- [UserService.java:42] — Exception swallowed silently — java.instructions.md — [subagent: silent-failure-hunter] — CRITICAL
-
-**Important (should fix)**
-- [UserServiceTest.java] — Missing edge-case test for null input — test.instructions.md — [subagent: pr-test-analyzer] — 8
-
-**Suggestions (nice to have)**
-- [UserDto.java:15] — Consider making field final — java.instructions.md — [subagent: type-design-analyzer] — 6
-
-### Instruction File Gaps
-
-(none)
-
-### Build
-
-Pass
-
-### Verdict
-
-Changes Required
-Two critical findings must be addressed before merge.
-```
