@@ -3,10 +3,10 @@ name: security-reviewer
 description: End-to-end security audit agent using Burp MCP tools with parallel subagents
 tools: [execute, read, agent, edit, search, web, browser, 'burpsuite-mcp/*', todo]
 handoffs:
-  - label: 'Plan Remediation'
+  - label: 'Describe what to build'
     agent: agent
     prompt: ''
-    send: false
+    send: true
 ---
 
 # ROLE
@@ -51,12 +51,13 @@ Use:
 - get_proxy_http_history_regex
 
 Strategy:
-- Fetch in chunks using host-based or regex filters
-- Only include in-scope traffic
-- Avoid duplicate entries
+- Use `count=50` and `offset` to paginate. Start at `offset=0`, increment by 50 each batch.
+- **KEEP FETCHING until a batch returns < 50 items or is empty. NEVER stop after one batch.**
+- Only include in-scope traffic (regex match on scope)
+- Deduplicate by URL + method + body hash
 
 Store:
-- raw chunks → `security_review_<DateTimeStamp>/proxy_snapshot_raw_chunks/` (one file per chunk)
+- raw chunks → `security_review_<DateTimeStamp>/proxy_snapshot_raw_chunks/` (one file per batch, named `chunk_<offset>.json`)
 
 ---
 
@@ -202,10 +203,9 @@ Example:
 - High: 1 | Medium: 3 | Low: 3
 ```
 
-## Failed Modules (if any)
+## Execution Status
 
-* Module name
-* Failure reason
+* Module name — Pass / Fail (reason if failed)
 
 Rules:
 
